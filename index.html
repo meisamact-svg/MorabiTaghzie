@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مربی تغذیه حرفه‌ای</title>
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--text:#17212b;--muted:#72808c;--line:#e5e9ed;--accent:#246bce;--danger:#d64545}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif}
+.wrap{max-width:1200px;margin:auto;padding:16px}.hero{background:linear-gradient(135deg,#111b24,#31536c);color:white;border-radius:24px;padding:25px;box-shadow:0 12px 35px #0002}
+.hero h1{margin:0 0 7px;font-size:29px}.hero p{margin:0;opacity:.82}.tabs{display:flex;gap:7px;margin:14px 0;overflow:auto}.tabs button{white-space:nowrap;width:auto}.tabs button.active{background:var(--accent);color:#fff}
+button,input,select{font:inherit;border-radius:12px}button{border:0;background:#17212b;color:#fff;padding:11px 15px;cursor:pointer;font-weight:700}button.secondary{background:#eaf0f5;color:#25313b}button.danger{background:var(--danger);padding:7px 10px}
+.card{background:var(--card);border-radius:20px;padding:17px;margin-bottom:14px;box-shadow:0 4px 20px #0000000b}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric{font-size:24px;font-weight:800;margin-top:5px}.muted{font-size:12px;color:var(--muted)}.bar{height:8px;background:#e8edf1;border-radius:99px;margin-top:9px;overflow:hidden}.fill{height:100%;width:0;background:var(--accent)}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input,.field select{width:100%;padding:11px;border:1px solid #d9e0e6;background:#fff}
+h2{font-size:18px;margin:0 0 14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px 7px;border-bottom:1px solid var(--line);text-align:right;font-size:12px}th{color:var(--muted)}
+.targets{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.targets input{width:100%;padding:10px;border:1px solid #d9e0e6}
+.meals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.meal{border:1px solid var(--line);border-radius:16px;padding:13px}.meal h3{margin:0 0 8px;font-size:15px}.meal .small{font-size:11px;color:var(--muted);line-height:1.8}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{padding:14px;background:#f7f9fa;border-radius:15px}.stat b{font-size:20px}
+.hidden{display:none}.note{font-size:12px;color:var(--muted);line-height:1.9}.empty{padding:25px;text-align:center;color:var(--muted)}
+@media(max-width:800px){.grid,.meals{grid-template-columns:repeat(2,1fr)}.form{grid-template-columns:1fr 1fr}.form .wide{grid-column:1/-1}.targets{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.wrap{padding:9px}.grid{grid-template-columns:1fr 1fr}.meals,.stats{grid-template-columns:1fr}.form{grid-template-columns:1fr}.targets{grid-template-columns:1fr 1fr}}
+</style></head>
+<body><div class="wrap">
+<div class="hero"><h1>مربی تغذیه حرفه‌ای</h1><p>ثبت غذا • محاسبه ماکروها • فیبر و ریزمغذی‌ها • گزارش روزانه</p></div>
+<div class="tabs"><button class="active" onclick="showTab('today',this)">امروز</button><button onclick="showTab('goals',this)">اهداف</button><button onclick="showTab('history',this)">سوابق</button><button onclick="showTab('foods',this)">غذاها</button></div>
+
+<div id="today">
+<div class="grid">
+<div class="card"><div class="muted">کالری</div><div class="metric"><span id="cal">0</span> kcal</div><div class="bar"><div id="bcal" class="fill"></div></div></div>
+<div class="card"><div class="muted">پروتئین</div><div class="metric"><span id="pro">0</span> g</div><div class="bar"><div id="bpro" class="fill"></div></div></div>
+<div class="card"><div class="muted">کربوهیدرات</div><div class="metric"><span id="carb">0</span> g</div><div class="bar"><div id="bcarb" class="fill"></div></div></div>
+<div class="card"><div class="muted">چربی</div><div class="metric"><span id="fat">0</span> g</div><div class="bar"><div id="bfat" class="fill"></div></div></div>
+</div>
+<div class="card"><h2>➕ ثبت غذا</h2><div class="form">
+<div class="field wide"><label>غذا</label><select id="food"></select></div>
+<div class="field"><label>مقدار (گرم)</label><input id="grams" type="number" min="0.1" value="100"></div>
+<div class="field"><label>وعده</label><select id="meal"><option>صبحانه</option><option>ناهار</option><option>شام</option><option>میان‌وعده</option></select></div>
+<button onclick="addFood()">افزودن</button></div><p class="note">وزن برنج و سیب‌زمینی را اگر پخته انتخاب کرده‌ای، به صورت پخته وارد کن. جو دوسر خشک است.</p></div>
+
+<div class="card"><h2>🍽️ وعده‌های امروز</h2><div id="meals" class="meals"></div></div>
+<div class="card"><h2>📋 جزئیات مواد مغذی</h2><div id="detail" class="stats"></div></div>
+<div class="card"><button class="danger" onclick="clearDay()">پاک کردن کل روز</button></div>
+</div>
+
+<div id="goals" class="hidden"><div class="card"><h2>🎯 اهداف روزانه</h2><div class="targets">
+<div><label class="muted">کالری</label><input id="gcal" type="number"></div><div><label class="muted">پروتئین (g)</label><input id="gpro" type="number"></div><div><label class="muted">کربوهیدرات (g)</label><input id="gcarb" type="number"></div><div><label class="muted">چربی (g)</label><input id="gfat" type="number"></div><div><label class="muted">فیبر (g)</label><input id="gfiber" type="number"></div>
+</div><br><button onclick="saveGoals()">ذخیره اهداف</button><p class="note">برای شروع، اعداد را متناسب با هدف خودت وارد کن. این برنامه جایگزین توصیه پزشکی یا رژیم اختصاصی متخصص تغذیه نیست.</p></div></div>
+
+<div id="history" class="hidden"><div class="card"><h2>📅 سابقه روزها</h2><div id="hist"></div></div></div>
+
+<div id="foods" class="hidden"><div class="card"><h2>🥗 افزودن غذای شخصی</h2><div class="form">
+<div class="field wide"><label>نام غذا</label><input id="fn" placeholder="مثلاً برنج مخصوص من"></div>
+<div class="field"><label>کالری / 100g</label><input id="fk" type="number"></div>
+<div class="field"><label>پروتئین / 100g</label><input id="fp" type="number"></div>
+<div class="field"><label>کربوهیدرات / 100g</label><input id="fc" type="number"></div>
+<div class="field"><label>چربی / 100g</label><input id="ff" type="number"></div>
+<div class="field"><label>فیبر / 100g</label><input id="ffi" type="number" value="0"></div>
+<button onclick="addCustom()">ذخیره غذا</button></div></div>
+<div class="card"><h2>غذاهای شخصی من</h2><div id="customList"></div></div></div>
+</div>
+
+<script>
+const base={
+"برنج سفید پخته":[130,2.7,28,.3,.4],"برنج سفید خام":[365,7.1,80,.7,1.3],"نان لواش":[275,9,55,1.2,2.5],
+"سیب‌زمینی پخته":[87,1.9,20.1,.1,1.8],"جو دوسر پرک خشک":[389,16.9,66.3,6.9,10.6],
+"سینه مرغ پخته":[165,31,0,3.6,0],"تخم مرغ کامل":[143,12.6,1.1,9.5,0],"گوشت گاو کم‌چرب پخته":[217,26,0,12,0],
+"ماهی سالمون پخته":[206,22,0,12,0],"تن ماهی در آب":[116,26,0,1,0],"ماست یونانی":[73,10,3.9,2,0],
+"شیر کم‌چرب":[47,3.4,4.8,1.5,0],"موز":[89,1.1,22.8,.3,2.6],"سیب":[52,.3,13.8,.2,2.4],
+"پرتقال":[47,.9,11.8,.1,2.4],"بادام":[579,21.2,21.6,49.9,12.5],"کره بادام‌زمینی":[588,25,20,50,6],
+"روغن زیتون":[884,0,0,100,0],"عدس پخته":[116,9,20.1,.4,7.9],"لوبیا قرمز پخته":[127,8.7,22.8,.5,6.4],
+"خیار":[15,.7,3.6,.1,.5],"گوجه فرنگی":[18,.9,3.9,.2,1.2],"نان سنگک":[259,10,52,1.5,4],
+"نان بربری":[259,10,52,1.5,3.5],"پنیر سفید":[264,14,4,21,0],"عسل":[304,.3,82.4,0,.2]
+};
+let custom=JSON.parse(localStorage.getItem("customFoods")||"{}");
+let days=JSON.parse(localStorage.getItem("nutritionHistory")||"{}");
+let goals=JSON.parse(localStorage.getItem("nutritionGoals")||'{"cal":2800,"pro":170,"carb":350,"fat":80,"fiber":30}');
+const todayKey=new Date().toISOString().slice(0,10);
+if(!days[todayKey])days[todayKey]=[];
+function db(){return {...base,...custom}}
+function fillSelect(){food.innerHTML="";Object.keys(db()).forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;food.appendChild(o)})}
+function save(){localStorage.setItem("nutritionHistory",JSON.stringify(days));render()}
+function addFood(){let g=+grams.value;if(g<=0)return;days[todayKey].push({name:food.value,g,meal:meal.value});save()}
+function remove(i){days[todayKey].splice(i,1);save()}
+function clearDay(){if(confirm("کل ثبت‌های امروز حذف شود؟")){days[todayKey]=[];save()}}
+function totals(list){let s={k:0,p:0,c:0,f:0,fi:0};list.forEach(x=>{let a=db()[x.name],m=x.g/100;s.k+=a[0]*m;s.p+=a[1]*m;s.c+=a[2]*m;s.f+=a[3]*m;s.fi+=a[4]*m});return s}
+function render(){let s=totals(days[todayKey]);cal.textContent=s.k.toFixed(0);pro.textContent=s.p.toFixed(1);carb.textContent=s.c.toFixed(1);fat.textContent=s.f.toFixed(1);
+setBar(bcal,s.k,goals.cal);setBar(bpro,s.p,goals.pro);setBar(bcarb,s.c,goals.carb);setBar(bfat,s.f,goals.fat);
+let groups={};days[todayKey].forEach((x,i)=>(groups[x.meal]??=[]).push({...x,i}));meals.innerHTML="";
+["صبحانه","ناهار","شام","میان‌وعده"].forEach(m=>{let box=document.createElement("div");box.className="meal";let arr=groups[m]||[];box.innerHTML=`<h3>${m}</h3>`;if(!arr.length)box.innerHTML+="<div class='small'>خالی</div>";arr.forEach(x=>{let a=db()[x.name],v=totals([x]);box.innerHTML+=`<div class='small'>${x.name} — ${x.g}g<br>${v.k.toFixed(0)} kcal | P ${v.p.toFixed(1)} | C ${v.c.toFixed(1)} | F ${v.f.toFixed(1)} <button class='danger' onclick='remove(${x.i})'>×</button></div>`});meals.appendChild(box)});
+detail.innerHTML=`<div class=stat>فیبر<br><b>${s.fi.toFixed(1)} g</b></div><div class=stat>قند قابل محاسبه<br><b>—</b></div><div class=stat>کالری از ماکروها<br><b>${(s.p*4+s.c*4+s.f*9).toFixed(0)} kcal</b></div><div class=stat>باقی‌مانده کالری<br><b>${Math.max(0,goals.cal-s.k).toFixed(0)}</b></div><div class=stat>باقی‌مانده پروتئین<br><b>${Math.max(0,goals.pro-s.p).toFixed(1)} g</b></div><div class=stat>باقی‌مانده کربوهیدرات<br><b>${Math.max(0,goals.carb-s.c).toFixed(1)} g</b></div>`;
+renderHistory();renderCustom();fillSelect()}
+function setBar(el,v,t){el.style.width=(t?Math.min(100,v/t*100):0)+"%"}
+function saveGoals(){goals={cal:+gcal.value,pro:+gpro.value,carb:+gcarb.value,fat:+gfat.value,fiber:+gfiber.value};localStorage.setItem("nutritionGoals",JSON.stringify(goals));render();alert("اهداف ذخیره شد")}
+function renderHistory(){hist.innerHTML="";Object.keys(days).sort().reverse().slice(0,30).forEach(d=>{let s=totals(days[d]);let div=document.createElement("div");div.className="card";div.style.margin="8px 0";div.innerHTML=`<b>${d}</b><br><span class=muted>${s.k.toFixed(0)} kcal | پروتئین ${s.p.toFixed(1)}g | کربو ${s.c.toFixed(1)}g | چربی ${s.f.toFixed(1)}g</span>`;hist.appendChild(div)})}
+function addCustom(){let n=fn.value.trim();if(!n)return;custom[n]=[+fk.value||0,+fp.value||0,+fc.value||0,+ff.value||0,+ffi.value||0];localStorage.setItem("customFoods",JSON.stringify(custom));fn.value="";fk.value=fp.value=fc.value=ff.value="";ffi.value=0;fillSelect();renderCustom()}
+function renderCustom(){customList.innerHTML=Object.keys(custom).length?Object.keys(custom).map(n=>`<div style="padding:9px;border-bottom:1px solid var(--line);font-size:12px">${n} — ${custom[n][0]} kcal | P ${custom[n][1]} | C ${custom[n][2]} | F ${custom[n][3]} | فیبر ${custom[n][4]}</div>`).join(""):"<div class=empty>غذای شخصی ثبت نشده.</div>"}
+function showTab(id,btn){document.querySelectorAll("#today,#goals,#history,#foods").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active")}
+gcal.value=goals.cal;gpro.value=goals.pro;gcarb.value=goals.carb;gfat.value=goals.fat;gfiber.value=goals.fiber;fillSelect();render();
+</script></body></html>
